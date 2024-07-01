@@ -1,0 +1,41 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.1
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - 8080:8080
+  #   # healthcheck:
+  #   #   test: ["CMD", "curl", "-f", "http://localhost:8080/realms/master"]
+  #   #   interval: 30s
+  #   #   timeout: 10s
+  #   #   retries: 5
+  
+  haproxy:
+    build: ./haproxy
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+      - ./haproxy/jwt_verify.lua:/usr/local/share/lua/5.4/jwt_verify.lua
+      - ./haproxy/base64.lua:/usr/local/share/lua/5.4/base64.lua
+    ports:
+      - 9000:80
+      - 443:443
+    # depends_on:
+    #   keycloak:
+    #     condition: service_healthy
+  
+  nodejs:
+    image: node:20-slim 
+    command: node index.js
+    working_dir: /usr/src/app
+    volumes:
+      - ./node-app:/usr/src/app
+    ports:
+      - 3000:3000
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:3000"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 5

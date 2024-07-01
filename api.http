@@ -1,0 +1,23 @@
+
+#
+@domain = localhost:9000
+
+### Get access token
+# @name login
+POST http://{{ domain }}/realms/master/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=password&client_id=admin-cli&username=admin&password=admin&scope=openid
+
+### Get auth user info
+GET http://{{ domain }}/realms/master/protocol/openid-connect/userinfo
+Authorization: Bearer {{ login.response.body.access_token }}
+
+
+### well-known
+GET http://{{ domain }}/.well-known/openid-configuration
+
+
+###
+GET http://{{ domain }}/hello
+Authorization: Bearer {{ login.response.body.access_token }}
